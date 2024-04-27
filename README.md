@@ -1,11 +1,11 @@
-Parksharks 
+Parksharks
+Team Members:
 
-Charlie Medlock   | medloc5@clemson.edu
-Eliza Sorber      | esorber@clemson.edu
-Chloe Crozier     | cscrozi@clemson.edu
+Charlie Medlock | medloc5@clemson.edu
+Eliza Sorber | esorber@clemson.edu
+Chloe Crozier | cscrozi@clemson.edu
 Harrison Langpaul | hlangpa@clemson.edu
-
-Github Link: buffet@buffet.cs.clemson.edu:esorber/parksharks
+Git Buffet Link: buffet@buffet.cs.clemson.edu:esorber/parksharks
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 UNIT TESTING:
