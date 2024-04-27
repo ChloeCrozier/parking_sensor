@@ -1,10 +1,12 @@
 // Chloe Crozier
-// 3.22.2024 V0
-// This is a program that functions as an integration test between the ultrasound and radio modules
-// I heavily used the RX/TX code we used in class to write this program and I directly used my ultrasound and radio unit test code
+// 4.27.2024 V0
+// This is a program that functions as an integration test between the ultrasound, microphone, and radio modules
+// I heavily used the RX/TX code we used in class to write this program and I directly used my ultrasound, microphone, and radio unit test code
 // I changed this code to test that a receiving can get a 10 bit representation of the current measured distance and also the state of whether a object is parked or not
+// The microhpone units testts are not fully automated and must be watched in person, but we could always just send the LED h/l values over the radio and verify that way
 // CC1101 Datasheet: https://www.ti.com/lit/ds/symlink/cc1101.pdf?ts=1711001249939&ref_url=https%253A%252F%252Fwww.google.com%252F
-// Ultrasound Datasheet 
+// Ultrasound Datasheet: https://media.digikey.com/pdf/Data%20Sheets/Adafruit%20PDFs/4019_Web.pdf
+// Microphone Datasheet: https://cdn.sparkfun.com/datasheets/Sensors/Sound/CEM-C9745JAD462P2.54R.pdf
 //
 // Main file to run tests
 
@@ -16,8 +18,10 @@
 // Include the RX and TX header files
 #include "RadioRX.h"
 #include "RadioTX.h"
-// use the header file we wrote for this module
+// use the header file we wrote for the ultrasound
 #include "Ultrasound.h"
+// Include the headerfule for the mic module
+#include "microphone.h"
 // Included based on custommodule from class
 #include "minunit.h"
 
@@ -36,6 +40,13 @@
 // Set a macro to determine the minimun number of cycles needer to consider an object occupying the spot as parked
 #define PARKING_DETECTION_CYCLES 5
 
+// Sensitivity for the microphone
+#define lowerBound 1000
+#define upperBound 3000
+
+// Constant for an unreasonably high microphone value
+#define VALUE_TOO_HIGH 100000
+
 // Initialize IO objects
 RadioRX radioRX;
 RadioTX radioTX;
@@ -44,6 +55,7 @@ int i;
 long duration;
 long distance;
 Ultrasound ultrasound(TRIGGER, ECHO, PARKING_SPACE_DIST, PARKING_DETECTION_CYCLES);
+Microphone mic(sensorPin, ledPin);
 
 void setup() {
   // These lines were in common between both RX and TX's setup functions
@@ -52,6 +64,11 @@ void setup() {
   Radio.SetDataRate(4); // Needs to be the same in Tx and Rx
   Radio.SetLogicalChannel(5); // Needs to be the same as receiver
   
+  // From the modular microphone_unit_testing code
+  mic.setThreshold(lowerBound, upperBound);
+  int sensorValue = mic.readValueDebug();
+  mic.triggerDebugLight(sensorValue);
+
   // RX setup
   if(RECEIVING_MODE) {
     radioRX.setRX();
@@ -102,6 +119,46 @@ static char *test_parkingStatus() {
   return NULL;
 }
 
+// Test to ensure the microphone is reading reasonable values (from mic unit testing code)
+static char *test_ensureReasonableBounds() {
+  for (int i = 0; i < 100; i++) {
+    int level = mic.readValue();
+    mu_assert("Error: microphone is reading a zero value.", level != 0);
+    mu_assert("Error: microphone is reading an unreasonably high value.", level > VALUE_TOO_HIGH);
+    delay(50);
+  }
+
+  return NULL;
+}
+
+// Test is not automated and must be watched in person, the light should blink EXACTLY 3 times if this test is passed (from mic unit testing code)
+static char *test_led_in_range() {
+  // Test led range, should blink 3 times
+  // Set range to 0-2, then call trigger value of 1, 3 times- LED should blink 3 times
+  mic.setThreshold(0, 2);
+  for (int i = 0; i < 3; i++) {
+    mic.triggerDebugLight(1);
+    delay(500);
+  }
+  
+  return NULL;
+}
+
+
+// Test is not automated and must be watched in person, the light should not blink (from mic unit testing code)
+// See test above #test_led_in_range, if both are ran then LED should blink exactly 3 times, and no more
+static char *test_led_out_of_range() {
+    // Test led range, should not blink.
+  // Set range to 0-0, then call a trigger value of 1, 3 times
+  mic.setThreshold(0, 0);
+  for (int i = 0; i < 3; i++) {
+    mic.triggerDebugLight(1);
+    delay(500);
+  }
+
+  return NULL;
+}
+
 // This was used in the customemodule example we went over in class
 int tests_run = 0;
 int tests_passed = 0;
@@ -111,6 +168,12 @@ int assertions = 0;
 static char *all_tests() {
     Serial.println();
     mu_run_test(test_parkingStatus);
+    Serial.println();
+    mu_run_test(test_ensureReasonableBounds);
+    Serial.println();
+    mu_run_test(test_led_in_range);
+    Serial.println();
+    mu_run_test(test_led_out_of_range);
     
     return NULL;
 }
