@@ -22,7 +22,7 @@
 #include "minunit.h"
 
 // Set a macro to determine if we are entering receiving (RX) or transmitting (TX) mode
-#define RECEIVING_MODE true
+#define RECEIVING_MODE false
 // Set a macro for when we want to turn on a unit testing mode
 #define DEBUG_MODE true
 // Set the trigger pin (we have it connected to P6_2)

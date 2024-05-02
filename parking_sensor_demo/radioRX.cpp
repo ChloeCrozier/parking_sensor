@@ -1,4 +1,4 @@
-// Chloe Crozier
+// Park Sharks
 // 3.22.2024 V0
 // This is a program that functions as an integration test between the ultrasound and radio modules
 // I heavily used the RX/TX code we used in class to write this program and I directly used my ultrasound and radio unit test code
@@ -8,7 +8,7 @@
 //
 // Radio receiving implementation
 
-#include "RadioRX.h"
+#include "radioRX.h"
 // These were used in RX/TX
 #include <cc1101.h>
 #include <macros.h>
@@ -70,10 +70,6 @@ void RadioRX::receivePacket() {
       // Add it to the sum
       packetSum += packetVal;
       parkedState = RX_buffer[0];
-    }
-
-    if(packetVal == 0){
-      Serial.println("\nThe received packet contained a 0 meaning that the ultrasound sensor had an invalid reading");
     }
 
     // According to RX, the ReceiveData function stops the 'polling', so we need to turning that back on

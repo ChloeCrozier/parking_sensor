@@ -6,6 +6,7 @@
 // Modular microphone implementation
 
 #include "microphone.h"
+#include "Arduino.h"
 
 Microphone::Microphone(int sensor, int led){
     sensorPin = sensor;

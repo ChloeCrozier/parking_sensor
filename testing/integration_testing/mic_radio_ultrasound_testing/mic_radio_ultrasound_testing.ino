@@ -16,19 +16,19 @@
 #include <pins.h>
 #include <registers.h>
 // Include the RX and TX header files
-#include "RadioRX.h"
-#include "RadioTX.h"
+#include "radioRX.h"
+#include "radioTX.h"
 // use the header file we wrote for the ultrasound
-#include "Ultrasound.h"
+#include "ultrasound.h"
 // Include the headerfule for the mic module
 #include "microphone.h"
 // Included based on custommodule from class
 #include "minunit.h"
 
 // Set a macro to determine if we are entering receiving (RX) or transmitting (TX) mode
-#define RECEIVING_MODE true
+#define RECEIVING_MODE false
 // Set a macro for when we want to turn on a unit testing mode
-#define DEBUG_MODE true
+#define DEBUG_MODE false
 // Set the trigger pin (we have it connected to P6_2)
 #define TRIGGER P6_2
 // Set the echo return pin (we have it connected to P6_3)
@@ -46,6 +46,10 @@
 
 // Constant for an unreasonably high microphone value
 #define VALUE_TOO_HIGH 100000
+
+#define ledPin P8_2
+#define sensorPin P3_5
+#include "energia.h"
 
 // Initialize IO objects
 RadioRX radioRX;

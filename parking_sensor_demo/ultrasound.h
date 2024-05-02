@@ -1,4 +1,4 @@
-// Chloe Crozier
+// Park Sharks
 // 3.22.2024 V0
 // This is a program that functions as an integration test between the ultrasound and radio modules
 // I heavily used the RX/TX code we used in class to write this program and I directly used my ultrasound and radio unit test code
@@ -29,6 +29,7 @@ class Ultrasound
     long getTimeParked(void);
     double getParkingSpaceDist(void);
     int getMinDetectionCycles(void);
+    void setCycleLength(int c);
   private:
     int triggerPin;
     int echoPin;

@@ -27,6 +27,7 @@ class Microphone
     int lowerthreshold;
     int higherthreshold;
     int debugLightLength;
+    int ledPin;
 
 };
 

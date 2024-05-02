@@ -1,4 +1,4 @@
-// Chloe Crozier
+// Park Sharks
 // 3.22.2024 V0
 // This is a program that functions as an integration test between the ultrasound and radio modules
 // I heavily used the RX/TX code we used in class to write this program and I directly used my ultrasound and radio unit test code
@@ -8,7 +8,7 @@
 //
 // Here are the implementations of the ultrasound class functions from ultrasound.h
 
-#include "Ultrasound.h"
+#include "ultrasound.h"
 
 // Constructor to intialize the I/O pins and time duration vars
 Ultrasound::Ultrasound(int output, int input, int parkingSpaceSize, int detectingCycles) {
@@ -118,6 +118,8 @@ void Ultrasound::isParked(long distance) {
       Serial.print(getObjectCount());
       Serial.println(" has left the spot");
     parkedState = false;
+    // Update time to track time spot is open
+    timeParked = millis();
   }
   // If there is no detected object or previously parked car
   else {
@@ -141,7 +143,7 @@ int Ultrasound::getObjectCount(void) {
     return objectCount;
 }
 
-// New function that returns the current time minus the tiem of the last park
+// New function that returns the current time minus the time of the last parking state update
 long Ultrasound::getTimeParked(void) {
     return (millis() - timeParked);
 }
@@ -152,4 +154,8 @@ double Ultrasound::getParkingSpaceDist(void) {
 
 int Ultrasound::getMinDetectionCycles(void) {
   return minDetectionCycles;
+}
+
+void Ultrasound::setCycleLength(int c) {
+  cycleLength = c;
 }
