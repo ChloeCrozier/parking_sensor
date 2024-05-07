@@ -43,18 +43,20 @@ int32_t Microphone::readValue() {
 //reads value from the sensor and prints to the serial monitor
 int32_t Microphone::readValueDebug(){
     int32_t sensorValue = readValue();
+    /*
     Serial.print("Microphone read: ");
     Serial.print(sensorValue);
     Serial.print(", Current Threshold: ");
     Serial.print(threshold);
     Serial.print("\n");
+    */
     
     return sensorValue;
 }
 
 // Test if value is in range
 bool Microphone::valueIsInRange(int value){
-    if (threshold > 500) {     
+    if (threshold > VOLUME_BOUND) {     
         return true;
     }
     return false;

@@ -5,6 +5,7 @@ See comment block in that file for sources
 */
 
 #define SAMPLES_SIZE 15
+#define VOLUME_BOUND 550
 
 #ifndef MICROPHONE_H
 #define MICROPHONE_H

@@ -18,6 +18,15 @@
 #include "microphone.h"
 
 /*
+   Prototypes
+*/
+
+void tickMicrophone(void);
+void tickUltrasound(void);
+void tickReceiver(void);
+void tickTransmitter(void);
+
+/*
    PINS
 */
 // Button to control system status (On or Off)
@@ -42,7 +51,7 @@
    CONSTANTS
 */
 // Set a macro in cm for test verification and also parking spaces are around 5 meters (500 cm)
-#define PARKING_SPACE_DIST 200
+#define PARKING_SPACE_DIST 100
 // Set a macro to determine the minimun number of cycles needer to consider an object occupying the spot as parked
 #define PARKING_DETECTION_CYCLES 5
 // Radio Channel
@@ -53,6 +62,7 @@
 /*
    TIMERS
 */
+#define TICK_LENGTH 25
 // Interval for running ultrasound check when in slow mode
 #define ULTRASOUND_SLOW 1000
 // Interval for running ultrasound check when in fast mode
@@ -63,10 +73,10 @@
 #define RADIO_CYCLE 3500
 
 /*
-    OPTIONS
+   OPTIONS
 */
 // Set a macro to determine if we are entering receiving (RX) or transmitting (TX) mode
-#define RECEIVING_MODE true
+#define RECEIVING_MODE false
 // Set a macro for when we want to turn on a unit testing mode
 #define DEBUG_MODE true
 
@@ -76,7 +86,7 @@ RadioTX radioTX;
 
 // Define state vars
 byte systemRunning = 1;
-byte debugMode = 1;
+byte debugMode = DEBUG_MODE;
 
 // Define component objects
 Ultrasound ultrasound(TRIGGER, ECHO, PARKING_SPACE_DIST, PARKING_DETECTION_CYCLES);
@@ -86,13 +96,11 @@ Microphone microphone(MICROPHONE_PIN, YELLOW_PIN);
 int timer_m = 0; // Microphone
 int timer_u = 0; // Ultrasound
 int timer_r = 0; // Radio (Sending)
-int tickLength = 25;
-
-int micDelay = 0;
 
 // Parking state
-bool oldState = false;
-bool newState;
+bool parkedState = false;
+// Used to ensure mic was activated for 2 cycles before triggering
+bool micState = false;
 
 void setup() {
   Serial.begin(9600);
@@ -134,87 +142,111 @@ void setup() {
 void loop() {
   // RECEIVING mode is for HUB device
   if (RECEIVING_MODE) {
-    radioRX.receivePacket();
-    if (radioRX.getReceivedStatus()) {
-      if (debugMode) radioRX.printBuffer();
-
-      int value = radioRX.getPacketVal();
-      bool parkingStatus = radioRX.getParkedState();
-      Serial.print("The parking sensor has been ");
-      Serial.print(parkingStatus ? "occupied" : "available");
-      Serial.print(" for ");
-      Serial.print(value);
-      Serial.print(" seconds.\n");
-    }
-    return;
+    tickReceiver();
   }
 
   // Below is all logic for transmitting mode (AKA parking sensor)
   if (!systemRunning) return;
 
-  timer_u += tickLength;
-  timer_m += tickLength;
-  timer_r += tickLength;
+  timer_u += TICK_LENGTH;
+  timer_m += TICK_LENGTH;
+  timer_r += TICK_LENGTH;
 
   // Microphone tick
   if (timer_m >= microphone.getCycleLength()) {
-    timer_m %= microphone.getCycleLength();
-
-    int value = debugMode ? microphone.readValueDebug() : microphone.readValue();
-
-    if (microphone.valueIsInRange(value) && oldState) {
-      if (debugMode) digitalWrite(YELLOW_PIN, HIGH);
-      ultrasound.setCycleLength(ULTRASOUND_FAST);
-
-    } else if (!microphone.valueIsInRange(value) && oldState) {
-      if (debugMode) digitalWrite(YELLOW_PIN, LOW);
-      ultrasound.setCycleLength(ULTRASOUND_SLOW);
-
-    } else {
-      if (debugMode) digitalWrite(YELLOW_PIN, LOW);
-      ultrasound.setCycleLength(ULTRASOUND_FAST);
-    }
-
+    tickMicrophone();
   }
 
   // Ultrasound tick
   if (timer_u >= ultrasound.getCycleLength()) {
-    timer_u %= ultrasound.getCycleLength();
-
-    long duration = ultrasound.measureTime();
-    long distance = ultrasound.measureDist(duration);
-
-    oldState = ultrasound.getParkedState();
-
-    // update parked state
-    ultrasound.isParked(distance);
-
-    newState = ultrasound.getParkedState();
-
-    if (!oldState && newState) {
-      // Car is now parked
-      if (debugMode) if (debugMode) digitalWrite(RED_PIN, HIGH);
-      if (debugMode) if (debugMode) digitalWrite(BLUE_PIN, LOW);
-      ultrasound.setCycleLength(ULTRASOUND_SLOW);
-    } else if (oldState && !newState) {
-      // Car is no longer parked
-      if (debugMode) if (debugMode) digitalWrite(RED_PIN, LOW);
-      if (debugMode) if (debugMode) digitalWrite(BLUE_PIN, HIGH);
-      ultrasound.setCycleLength(ULTRASOUND_FAST);
-    }
-
-    // Radio tick (Triggered inside of ultrasound tick)
-    if (timer_r >= RADIO_CYCLE) {
-      Serial.println("Radio tick");
-
-      timer_r %= RADIO_CYCLE;
-      int parkedTimeInSeconds = (ultrasound.getTimeParked() / 1000);
-      if (parkedTimeInSeconds > 511) parkedTimeInSeconds = 511;
-      radioTX.sendData(parkedTimeInSeconds, newState);
-    }
+    tickUltrasound();
   }
 
-  delay(tickLength);
+  // Radio tick
+  if (timer_r >= RADIO_CYCLE) {
+    tickTransmitter();
+  }
+
+  delay(TICK_LENGTH);
+}
+
+// tick for RECEIVING_MODE, not based on a timer
+void tickReceiver() {
+  radioRX.receivePacket();
+  if (radioRX.getReceivedStatus()) {
+    Serial.print("\n");
+    if (debugMode) radioRX.printBuffer();
+
+    int value = radioRX.getPacketVal();
+    bool parkingStatus = radioRX.getParkedState();
+    Serial.print("The parking sensor has been ");
+    Serial.print(parkingStatus ? "occupied" : "available");
+    Serial.print(" for ");
+    Serial.print(value);
+    Serial.print(" seconds.\n");
+  }
+  return;
+}
+
+// Tick Microphone
+void tickMicrophone() {
+  timer_m %= microphone.getCycleLength();
+
+  int value = debugMode ? microphone.readValueDebug() : microphone.readValue();
+  bool micInRange = microphone.valueIsInRange(value);
+
+  // Update LED
+  if (debugMode && parkedState && micInRange) {
+    digitalWrite(YELLOW_PIN, HIGH);
+  } else {
+    digitalWrite(YELLOW_PIN, LOW);
+  }
+
+  // Update ultrasound tick speed
+  if (!micInRange && parkedState) {
+    ultrasound.setCycleLength(ULTRASOUND_SLOW);
+  } else {
+    ultrasound.setCycleLength(ULTRASOUND_FAST);
+  }
+
+  micState = micInRange;
+}
+
+// Ultrasound Tick
+void tickUltrasound() {
+  timer_u %= ultrasound.getCycleLength();
+
+  long duration = ultrasound.measureTime();
+  long distance = ultrasound.measureDist(duration);
+
+  parkedState = ultrasound.getParkedState();
+
+  // update parked state
+  ultrasound.isParked(distance);
+
+  bool newState = ultrasound.getParkedState();
+
+  if (!parkedState && newState) {
+    // Car is now parked
+    if (debugMode) digitalWrite(RED_PIN, HIGH);
+    if (debugMode) digitalWrite(BLUE_PIN, LOW);
+    ultrasound.setCycleLength(ULTRASOUND_SLOW);
+  } else if (parkedState && !newState) {
+    // Car is no longer parked
+    if (debugMode) digitalWrite(RED_PIN, LOW);
+    if (debugMode) digitalWrite(BLUE_PIN, HIGH);
+  }
+}
+
+// Radio sending tick
+void tickTransmitter() {
+  if (debugMode) Serial.println("Radio tick");
+
+  timer_r %= RADIO_CYCLE;
+  int parkedTimeInSeconds = (ultrasound.getTimeParked() / 1000);
+  // Account for max packet value
+  if (parkedTimeInSeconds > 511) parkedTimeInSeconds = 511;
+  radioTX.sendData(parkedTimeInSeconds, parkedState);
 }
 
 void onOffPress() {
