@@ -60,3 +60,5 @@
 ### Parking Sensor Demo:
 
 1. Navigate to the `parking_sensor_demo` folder and open the module in Energia (`parking_sensor_demo.ino`).
+
+<img width="606" alt="assembled_board" src="https://github.com/ChloeCrozier/parking_sensor/assets/40836363/cc4f9a4d-c46a-4614-bfc9-053440b35001">
