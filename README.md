@@ -8,6 +8,7 @@
 **Git Buffet Link:** [buffet@buffet.cs.clemson.edu:esorber/parksharks](buffet@buffet.cs.clemson.edu:esorber/parksharks)
 
 ---
+Our board's ultrasound sensor detects an object within half of a pre-set 'parking spot' distance. Once the object has been detected for a given number of cycles, it is considered parked, and the LEDs toggle from blue (unoccupied) to red (occupied). After an object is parked, we turn on microphone polling to detect low-frequency noises suggesting the object may be leaving the spot (such as engine rumble or footsteps). We increase the ultrasound sensor's polling rate when noise above a set threshold is detected, indicated by the yellow LED. Once the ultrasound no longer detects an object, we turn off the microphone polling and decrease the ultrasound polling rate back to the original slow cycle.
 
 <img width="606" alt="assembled_board" src="https://github.com/ChloeCrozier/parking_sensor/assets/40836363/cc4f9a4d-c46a-4614-bfc9-053440b35001">
 
