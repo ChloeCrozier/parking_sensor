@@ -1,4 +1,4 @@
-# Parksharks Team Members:
+# Parkshark's Team Members:
 
 - Chloe Crozier | [cscrozi@clemson.edu](mailto:cscrozi@clemson.edu)
 - Eliza Sorber | [esorber@clemson.edu](mailto:esorber@clemson.edu)
@@ -8,12 +8,28 @@
 **Git Buffet Link:** [buffet@buffet.cs.clemson.edu:esorber/parksharks](buffet@buffet.cs.clemson.edu:esorber/parksharks)
 
 ---
-Our board's ultrasound sensor detects an object within half of a pre-set 'parking spot' distance. Once the object has been detected for a given number of cycles, it is considered parked, and the LEDs toggle from blue (unoccupied) to red (occupied). After an object is parked, we turn on microphone polling to detect low-frequency noises that suggest the object may be leaving the spot (such as engine rumble or footsteps). We speed up the ultrasound sensor's polling rate when the yellow LED indicates noise above the set threshold. When the ultrasound no longer detects an object, we turn off the microphone polling and decrease the ultrasound polling rate back to the original slow cycle. We have a button to turn the system on/off and a button to turn debug mode on/off (LED indicators). We use a switch to select the potentiometer path when correcting envelope distortions in our microphone filtering. We utilize radio communication to transmit information regarding the status of a parking spot (whether it's empty or occupied) and the duration for which an object has been parked.
-
-
 <p align="center">
   <img alt="assembled_board" src="https://github.com/ChloeCrozier/parking_sensor/assets/40836363/cc4f9a4d-c46a-4614-bfc9-053440b35001">
 </p>
+
+- Object Detection with Ultrasound Sensor:
+  - The ultrasound sensor detects an object within half of a pre-set 'parking spot' distance.
+  - Once the object has been detected for a given number of cycles, it is considered parked.
+- LED Status Indication:
+  - The LEDs toggle from blue (unoccupied) to red (occupied) to indicate the parking spot status.
+- Microphone Polling for Object Departure Detection:
+  - After an object is parked, microphone polling is turned on to detect low-frequency noises that suggest the object may be leaving the spot (e.g., engine rumble or footsteps).
+- Polling Rate Adjustment with Yellow LED:
+  - The ultrasound sensor's polling rate is increased when the yellow LED indicates noise above the set threshold.
+- Reverting to Original Polling Rate:
+  - When the ultrasound no longer detects an object, microphone polling is turned off, and the ultrasound polling rate is decreased back to the original slow cycle.
+- System Controls:
+  - There is a button to turn the system on/off.
+  - Another button is used to turn debug mode on/off, indicated by LED indicators.
+- Potentiometer Path Selection for Filtering:
+  - A switch is used to select the potentiometer path when correcting envelope distortions in the microphone filtering.
+- Radio Communication for Data Transmission:
+  - Radio communication is utilized to transmit information about the status of a parking spot (empty or occupied) and the duration for which an object has been parked.
 
 ---
 
