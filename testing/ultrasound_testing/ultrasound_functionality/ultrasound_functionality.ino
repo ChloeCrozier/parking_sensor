@@ -8,7 +8,7 @@
 
 // Set the trigger pin (we have it connected to P6_2)
 #define TRIGGER P6_2
-// Se the echo return pin (we have it connected to P6_3)
+// Set the echo return pin (we have it connected to P6_3)
 #define ECHO P6_3
 int timeSending;
 int readInTime;
@@ -66,6 +66,7 @@ void loop() {
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.println(" cm");
-  
-  delay(1500); // Delay for clarity/verification in reading the output
+
+  // Delay for clarity/verification in reading the output
+  delay(1500);
 }
