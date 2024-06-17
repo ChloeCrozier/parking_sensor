@@ -1,4 +1,4 @@
-## Embedded Parking Sensor and Occupancy Detection Monitor
+## Embedded Systems Parking Sensor and Occupancy Detection Monitor
 ### Parkshark's Team Members:
 
 - Chloe Crozier | [cscrozi@clemson.edu](mailto:cscrozi@clemson.edu)
