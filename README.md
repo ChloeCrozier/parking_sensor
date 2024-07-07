@@ -1,4 +1,5 @@
 ## Embedded Systems Parking Sensor and Occupancy Detection Monitor
+Embedded motion sensor that uses an MSB430 Texas Instruments microcontroller to transmit parking space occupancy information.
 ### Parkshark's Team Members:
 
 - Chloe Crozier | [cscrozi@clemson.edu](mailto:cscrozi@clemson.edu)
